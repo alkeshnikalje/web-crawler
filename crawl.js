@@ -1,3 +1,5 @@
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 export const normalizeURL = (url) => {
   try {
     const urlObj = new URL(url);
@@ -11,4 +13,18 @@ export const normalizeURL = (url) => {
   } catch (error) {
     return "invalid url";
   }
+};
+
+export const getURLsFromHTML = (htmlBody, baseURL) => {
+  const dom = new JSDOM(htmlBody);
+  const anchorElements = dom.window.document.querySelectorAll("a");
+  let fullUrls = [];
+  for (let i = 0; i < anchorElements.length; i++) {
+    if (anchorElements[i].hasAttribute("href")) {
+      const url = anchorElements[i].getAttribute("href");
+      const fullUrl = new URL(url, baseURL).href;
+      fullUrls.push(fullUrl);
+    }
+  }
+  return fullUrls;
 };
