@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-export const normalizeURL = (url) => {
+
+const normalizeURL = (url) => {
   try {
     const urlObj = new URL(url);
     let path;
@@ -15,7 +16,7 @@ export const normalizeURL = (url) => {
   }
 };
 
-export const getURLsFromHTML = (htmlBody, baseURL) => {
+const getURLsFromHTML = (htmlBody, baseURL) => {
   const dom = new JSDOM(htmlBody);
   const anchorElements = dom.window.document.querySelectorAll("a");
   let fullUrls = [];
@@ -28,3 +29,5 @@ export const getURLsFromHTML = (htmlBody, baseURL) => {
   }
   return fullUrls;
 };
+
+export { normalizeURL, getURLsFromHTML };
