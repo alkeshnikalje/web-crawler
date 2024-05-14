@@ -30,9 +30,30 @@ const getURLsFromHTML = (htmlBody, baseURL) => {
   return fullUrls;
 };
 
-const crawlPage = async (URL) => {
+const crawlPage = async (baseURL, currentURL = baseURL, pages = {}) => {
+  const baseUrlObj = new URL(baseURL);
+  const currentURLObj = new URL(currentURL);
+  if (baseUrlObj.host !== currentURLObj.host) {
+    return pages;
+  }
+  const normalizedCurrUrl = normalizeURL(currentURL);
+  if (normalizedCurrUrl in pages) {
+    pages[normalizedCurrUrl] += 1;
+    return pages;
+  }
+  pages[normalizedCurrUrl] = 1;
+  const html = await htmlFromUrl(currentURL);
+  const urls = getURLsFromHTML(html, baseURL);
+
+  for (const currUrl of urls) {
+    pages = await crawlPage(baseURL, currUrl, pages);
+  }
+  return pages;
+};
+
+const htmlFromUrl = async (url) => {
   try {
-    const response = await fetch(URL);
+    const response = await fetch(url);
     if (response.status >= 400) {
       console.log(`Got HTTP error: ${response.status} ${response.statusText}`);
       return;
@@ -43,7 +64,7 @@ const crawlPage = async (URL) => {
       return;
     }
     const html = await response.text();
-    console.log(html);
+    return html;
   } catch (error) {
     throw new Error(`Got Network error: ${error.message}`);
   }
